@@ -209,13 +209,14 @@ class ImageBehavior extends CActiveRecordBehavior {
 
             $imageprops = $image->getImageGeometry();
 
+            $image->thumbnailImage($this->owner->maxDimensions['width'], $this->owner->maxDimensions['height'], true);
+            /* old resize method
             $fitbyWidth = (($this->owner->maxDimensions['width'] / $imageprops['width']) < ($this->owner->maxDimensions['height'] / $imageprops['height'])) ? true : false;
-            
             if($fitbyWidth){
-                $image->thumbnailImage($this->owner->maxDimensions['width'], 0, false);
-            } else {
                 $image->thumbnailImage(0, $this->owner->maxDimensions['height'], false);
-            }
+            } else {
+                $image->thumbnailImage($this->owner->maxDimensions['width'], 0, false);
+            }*/
 
             $image->writeImage($this->owner->pathToImageFolder.$file_name);
             $image->destroy();
