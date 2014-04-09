@@ -207,9 +207,21 @@ class ImageBehavior extends CActiveRecordBehavior {
         
         if($image){
 
-            $imageprops = $image->getImageGeometry();
+            list($width, $height) = array_values($image->getImageGeometry());
+            
+            if($width / $height > 1){
+                $image->thumbnailImage(0, $this->owner->maxDimensions['height'], false);
+            } else {
+                $image->thumbnailImage($this->owner->maxDimensions['width'], 0, false);
+            }
 
-            $image->thumbnailImage($this->owner->maxDimensions['width'], $this->owner->maxDimensions['height'], true);
+            list($width, $height) = array_values($image->getImageGeometry());
+
+            $x = ($width-$this->owner->maxDimensions['width'])/2;
+            $y = ($height-$this->owner->maxDimensions['height'])/2;
+            
+            $image->cropImage($this->owner->maxDimensions['width'], $this->owner->maxDimensions['height'], $x, $y);
+            //$image->thumbnailImage($this->owner->maxDimensions['width'], $this->owner->maxDimensions['height'], true);
             /* old resize method
             $fitbyWidth = (($this->owner->maxDimensions['width'] / $imageprops['width']) < ($this->owner->maxDimensions['height'] / $imageprops['height'])) ? true : false;
             if($fitbyWidth){
