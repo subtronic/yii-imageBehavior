@@ -12,7 +12,10 @@ class ImageBehavior extends CActiveRecordBehavior {
      * Prefixs for 2 type of file
      * @var array
      */
-    public $typePrefix = array();
+    public $typePrefix = array(        
+        'tmb' => 'tmb_',
+        'origin' => 'origin_',
+    );
 
 
     /**
@@ -44,7 +47,7 @@ class ImageBehavior extends CActiveRecordBehavior {
      * for identify image name
      * @var string
      */
-    public $uniqeAttrName = null;
+    public $uniqeAttrName = 'id';
 
     /**
      * Return unique identify for image
