@@ -182,18 +182,19 @@ class ImageBehavior extends CActiveRecordBehavior {
      */
     public function beforeSave($event)
     {
+        $fileName = $this->owner->id ? : microtime(true);
         $file = CUploadedFile::getInstance($this->owner, $this->owner->propertyName);
         if ($file instanceof CUploadedFile) {
             if(isset($this->owner->{$this->owner->propertyName}) && file_exists($this->owner->pathToImage)){
                 $this->owner->deleteImage($this->owner->{$this->owner->propertyName});
             }
 
-            $file->saveAs($this->owner->pathToImageFolder . 'origin_' . $this->owner->id . '.' . $file->extensionName);
+            $file->saveAs($this->owner->pathToImageFolder . $this->owner->typePrefix['origin'] . $fileName . '.' . $file->extensionName);
             $this->owner->{$this->owner->propertyName} = $file;
             
-            $this->owner->resize();
+            $this->owner->resize($fileName);
             
-            $this->owner->{$this->owner->propertyName} = $this->owner->id . '.' . $file->extensionName;      
+            $this->owner->{$this->owner->propertyName} = $fileName . '.' . $file->extensionName;      
         }
         return parent::beforeSave($event);
     }
@@ -201,10 +202,10 @@ class ImageBehavior extends CActiveRecordBehavior {
     /**
      * Change image size
      */
-    public function resize()
+    public function resize($fileName)
     {
-        $path = $this->owner->pathToImageFolder . $this->owner->typePrefix['origin'] . $this->owner->id . '.' . $this->owner->{$this->owner->propertyName}->extensionName;
-        $file_name = $this->owner->typePrefix['tmb']. $this->owner->id . '.' . $this->owner->{$this->owner->propertyName}->extensionName;
+        $path = $this->owner->pathToImageFolder . $this->owner->typePrefix['origin'] . $fileName . '.' . $this->owner->{$this->owner->propertyName}->extensionName;
+        $file_name = $this->owner->typePrefix['tmb']. $fileName . '.' . $this->owner->{$this->owner->propertyName}->extensionName;
        
         $image = new Imagick($path);
         
