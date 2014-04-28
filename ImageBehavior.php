@@ -2,6 +2,7 @@
 
 class ImageBehavior extends CActiveRecordBehavior {
 
+    private $after = null;
     /**
      * Max dimenstions for tumbnailed image
      * @var array
@@ -185,6 +186,23 @@ class ImageBehavior extends CActiveRecordBehavior {
      */
     public function beforeSave($event)
     {
+        if(!$this->owner->isNewRecord){
+            $this->saveImg();
+        }
+
+        return parent::beforeSave($event);
+    }
+
+    public function afterSave($event){
+
+        if($this->owner->isNewRecord){
+            $this->saveImg();
+        }
+        return parent::afterSave($event);
+    }
+
+    public function saveImg()
+    {
         $fileName = $this->owner->id ? : microtime(true);
         $file = CUploadedFile::getInstance($this->owner, $this->owner->propertyName);
         if ($file instanceof CUploadedFile) {
@@ -197,11 +215,14 @@ class ImageBehavior extends CActiveRecordBehavior {
     
             $this->owner->resize($fileName);
             
-            $this->owner->{$this->owner->propertyName} = $fileName . '.' . $file->extensionName;      
+            $this->owner->{$this->owner->propertyName} = $fileName . '.' . $file->extensionName;
+            if($this->owner->isNewRecord){
+                $this->owner->isNewRecord = false;
+                $this->owner->saveAttributes(array($this->owner->propertyName));
+            }
         }
-        return parent::beforeSave($event);
-    }
 
+    }
     /**
      * Change image size
      */
