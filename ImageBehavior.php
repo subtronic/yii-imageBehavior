@@ -2,7 +2,8 @@
 
 class ImageBehavior extends CActiveRecordBehavior {
 
-    private $after = null;
+    private $saveYet = false;
+
     /**
      * Max dimenstions for tumbnailed image
      * @var array
@@ -205,14 +206,14 @@ class ImageBehavior extends CActiveRecordBehavior {
     {
         $fileName = $this->owner->id ? : microtime(true);
         $file = CUploadedFile::getInstance($this->owner, $this->owner->propertyName);
-        if ($file instanceof CUploadedFile) {
+        if ($file instanceof CUploadedFile && !$this->saveYet) {
             if(isset($this->owner->{$this->owner->propertyName}) && file_exists($this->owner->pathToImage)){
                 $this->owner->deleteImage($this->owner->{$this->owner->propertyName});
             }
 
             $file->saveAs($this->owner->pathToImageFolder . $this->owner->typePrefix['origin'] . $fileName . '.' . $file->extensionName);
             $this->owner->{$this->owner->propertyName} = $file;
-    
+            $this->saveYet = true;
             $this->owner->resize($fileName);
             
             $this->owner->{$this->owner->propertyName} = $fileName . '.' . $file->extensionName;
@@ -230,8 +231,8 @@ class ImageBehavior extends CActiveRecordBehavior {
     {
         $path = $this->owner->pathToImageFolder . $this->owner->typePrefix['origin'] . $fileName . '.' . $this->owner->{$this->owner->propertyName}->extensionName;
         $file_name = $this->owner->typePrefix['tmb']. $fileName . '.' . $this->owner->{$this->owner->propertyName}->extensionName;
-       
-        $image = new Imagick($path);
+
+        $image = file_exists($path) ? new Imagick($path) : null;
         
         if($image){
             if(eval($this->owner->needResizeExpresion)){
@@ -264,7 +265,7 @@ class ImageBehavior extends CActiveRecordBehavior {
             $image->destroy();
 
         } else {
-            throw new CHttpExtension(503, 'Изображение '.$pathToImage.' не существует');
+            throw new CHttpException(503, 'Изображение '.$this->owner->pathToImage.' не существует');
         }
     }
     
